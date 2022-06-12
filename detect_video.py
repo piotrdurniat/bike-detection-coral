@@ -21,11 +21,13 @@ import numpy as np
 
 from PIL import Image
 from PIL import ImageDraw
+from third_party.sort_master.sort import *
+from pathlib import PosixPath, Path
+
 
 import detect
 import tflite_runtime.interpreter as tflite
 import platform
-from third_party.sort_master.sort import *
 
 EDGETPU_SHARED_LIB = {
     'Linux': 'libedgetpu.so.1',
@@ -100,12 +102,18 @@ def main():
                         help='File path of labels file.')
     parser.add_argument('-t', '--threshold', type=float, default=0.4,
                         help='Score threshold for detected objects.')
-    parser.add_argument('-o', '--output',
-                        help='File path for the result image with annotations')
+    parser.add_argument(
+        '--output-dir', '-o',
+        type=str,
+        help='output directory',
+        required=True
+    )
     parser.add_argument('-c', '--count', type=int, default=5,
                         help='Number of times to run inference')
     parser.add_argument('--show-vid', action='store_true',
                         help='display video results')
+    parser.add_argument('--save-vid', action='store_true',
+                        help='Save output video file')
     args = parser.parse_args()
 
     labels = load_labels(args.labels) if args.labels else {}
@@ -114,15 +122,22 @@ def main():
 
     mot_tracker = Sort()
 
-    vid = cv2.VideoCapture(args.input)
+    vid_cap = cv2.VideoCapture(args.input)
+    vid_writer = None
+
+    if not os.path.exists(args.output_dir):
+        os.mkdir(args.output_dir)
+
+    vid_save_path = PosixPath(args.output_dir) / os.path.basename(args.input)
+    print(vid_save_path)
+
+    is_stream = args.input.startswith("/dev/video")
+
     while(True):
 
-        _, frame = vid.read()
-
+        _, frame = vid_cap.read()
         image = Image.fromarray(frame)
-
-        objs = detect_img(image, interpreter, labels,
-                          args.threshold, args.output)
+        objs = detect_img(image, interpreter, args.threshold)
 
         if len(objs) > 0:
             detections = []  # np.array([])
@@ -149,15 +164,32 @@ def main():
         if args.show_vid:
             cv2.imshow('frame', frame)
 
+        if args.save_vid:
+            if not isinstance(vid_writer, cv2.VideoWriter):
+                fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+                # force *.mp4 suffix on results videos
+                vid_save_path = str(Path(vid_save_path).with_suffix('.mp4'))
+
+                vid_writer = cv2.VideoWriter(
+                    vid_save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+
+            vid_writer.write(frame)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        if args.input != "/dev/video0" and vid.get(cv2.CAP_PROP_POS_FRAMES) \
-                == vid.get(cv2.CAP_PROP_FRAME_COUNT):
+        if not is_stream and vid_cap.get(cv2.CAP_PROP_POS_FRAMES) \
+                == vid_cap.get(cv2.CAP_PROP_FRAME_COUNT):
             break
 
+    if isinstance(vid_writer, cv2.VideoWriter):
+        vid_writer.release()
 
-def detect_img(image, interpreter, labels, threshold, output):
+
+def detect_img(image, interpreter, threshold):
     scale = detect.set_input(interpreter, image.size,
                              lambda size: image.resize(size, Image.ANTIALIAS))
 
