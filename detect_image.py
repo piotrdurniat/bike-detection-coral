@@ -17,7 +17,7 @@
 import argparse
 import time
 import cv2
-import numpy
+import numpy as np
 
 from PIL import Image
 from PIL import ImageDraw
@@ -25,6 +25,7 @@ from PIL import ImageDraw
 import detect
 import tflite_runtime.interpreter as tflite
 import platform
+from third_party.sort_master.sort import *
 
 EDGETPU_SHARED_LIB = {
     'Linux': 'libedgetpu.so.1',
@@ -64,14 +65,27 @@ def make_interpreter(model_file):
         ])
 
 
-def draw_objects(draw, objs, labels):
+def draw_objects(draw, objs, labels, trdata):
     """Draws the bounding box and label for each object."""
-    for obj in objs:
+
+    if (np.array(trdata)).size:
+        for td in trdata:
+            x0, y0, x1, y1, trackID = td
+            overlap = 0
+            for ob in objs:
+                dx0, dy0, dx1, dy1 = ob.bbox.xmin, ob.bbox.ymin, ob.bbox.xmax, ob.bbox.ymax
+                area = (min(dx1, x1)-max(dx0, x0)) * \
+                    (min(dy1, y1)-max(dy0, y0))
+                if (area > overlap):
+                    overlap = area
+                    obj = ob
+
         bbox = obj.bbox
         draw.rectangle([(bbox.xmin, bbox.ymin), (bbox.xmax, bbox.ymax)],
                        outline='red')
         draw.text((bbox.xmin + 10, bbox.ymin + 10),
-                  '%s\n%.2f' % (labels.get(obj.id, obj.id), obj.score),
+                  '%d  %s\n%.2f' % (int(trackID), labels.get(
+                      obj.id, obj.id), obj.score),
                   fill='red')
 
 
@@ -98,6 +112,8 @@ def main():
     interpreter = make_interpreter(args.model)
     interpreter.allocate_tensors()
 
+    mot_tracker = Sort()
+
     vid = cv2.VideoCapture(args.input)
     while(True):
 
@@ -108,20 +124,27 @@ def main():
         objs = detect_img(image, interpreter, labels,
                           args.threshold, args.output)
 
-        # print('-------RESULTS--------')
-        if not objs:
-            print('No objects detected')
+        if len(objs) > 0:
+            detections = []  # np.array([])
+            for obj in objs:
+                element = []  # np.array([])
+                element.append(obj.bbox.xmin)
+                element.append(obj.bbox.ymin)
+                element.append(obj.bbox.xmax)
+                element.append(obj.bbox.ymax)
+                element.append(obj.score)
+                detections.append(element)
 
-        # for obj in objs:
-        #     print(labels.get(obj.id, obj.id))
-        #     print('  id:    ', obj.id)
-        #     print('  score: ', obj.score)
-        #     print('  bbox:  ', obj.bbox)
+            detections = np.array(detections)
 
-        image = image.convert('RGB')
-        draw_objects(ImageDraw.Draw(image), objs, labels)
+            track_bbs_ids = mot_tracker.update(detections)
+            print(objs)
+            print(track_bbs_ids)
 
-        frame = numpy.array(image)
+            image = image.convert('RGB')
+            draw_objects(ImageDraw.Draw(image), objs, labels, track_bbs_ids)
+
+        frame = np.array(image)
 
         if args.show_vid:
             cv2.imshow('frame', frame)
