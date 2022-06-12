@@ -98,12 +98,6 @@ def main():
     interpreter = make_interpreter(args.model)
     interpreter.allocate_tensors()
 
-    # image = Image.open(args.input)
-
-    # print('----INFERENCE TIME----')
-    # print('Note: The first inference is slow because it includes',
-    #       'loading the model into Edge TPU memory.')
-
     vid = cv2.VideoCapture(args.input)
     while(True):
 
@@ -114,15 +108,15 @@ def main():
         objs = detect_img(image, interpreter, labels,
                           args.threshold, args.output)
 
-        print('-------RESULTS--------')
+        # print('-------RESULTS--------')
         if not objs:
             print('No objects detected')
 
-        for obj in objs:
-            print(labels.get(obj.id, obj.id))
-            print('  id:    ', obj.id)
-            print('  score: ', obj.score)
-            print('  bbox:  ', obj.bbox)
+        # for obj in objs:
+        #     print(labels.get(obj.id, obj.id))
+        #     print('  id:    ', obj.id)
+        #     print('  score: ', obj.score)
+        #     print('  bbox:  ', obj.bbox)
 
         image = image.convert('RGB')
         draw_objects(ImageDraw.Draw(image), objs, labels)
@@ -135,7 +129,7 @@ def main():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        if vid.get(cv2.CAP_PROP_POS_FRAMES) \
+        if args.input != "/dev/video0" and vid.get(cv2.CAP_PROP_POS_FRAMES) \
                 == vid.get(cv2.CAP_PROP_FRAME_COUNT):
             break
 
