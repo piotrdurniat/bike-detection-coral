@@ -2,8 +2,10 @@ import numpy as np
 from detection_counter.DetectionLine import DetectionLine
 from PIL import ImageFont
 
-font_l = ImageFont.truetype(font="LiberationSans-Regular.ttf", size=20)
-font_s = ImageFont.truetype(font="LiberationSans-Regular.ttf", size=12)
+FONT_FILE = 'fonts/LiberationSans-Regular.ttf'
+
+FONT_L = ImageFont.truetype(font=FONT_FILE, size=20)
+FONT_S = ImageFont.truetype(font=FONT_FILE, size=12)
 
 
 def draw_line(draw, p, q):
@@ -11,7 +13,7 @@ def draw_line(draw, p, q):
     draw.line([(p.x, p.y), (q.x, q.y)], fill='white', width=1)
 
 
-def write_text(draw, text, pos=(30, 30), font=font_l):
+def write_text(draw, text, pos=(30, 30), font=FONT_L):
     draw.text((pos[0], pos[1]), text, font=font,  fill='white',
               stroke_width=2, stroke_fill='black')
 
@@ -27,4 +29,4 @@ def draw_objects(draw, full_dets: np.ndarray, labels):
 
         cls_name = labels.get(cls, cls)
         write_text(draw, f'{int(id)} {cls_name}\n{conf:.3f}',
-                   (xmin + 10, ymin + 10), font=font_s)
+                   (xmin + 10, ymin + 10), font=FONT_S)

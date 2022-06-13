@@ -1,6 +1,5 @@
 import argparse
 import time
-from turtle import left
 import cv2
 import numpy as np
 import tempfile
@@ -203,7 +202,7 @@ def run_detector(model, labels, threshold, output_dir, input_file, show_vid, sav
         image = image.convert('RGB')
         annotator = ImageDraw.Draw(image)
         draw_line(annotator, detection_line.p, detection_line.q)
-        write_text(annotator, f'Left: {left_counter}, Right {right_counter}')
+        write_text(annotator, f'Left: {left_counter}, Right: {right_counter}')
 
         if len(objs) > 0:
             detections = get_tracker_format(objs)
