@@ -1,6 +1,6 @@
 python3 bikedet.py \
     --input ~/Projects/PZ_neuro/sources/s03e03.mp4 \
-    --output-dir ./runs/efficientdet_lite1 \
+    --output-dir ./runs/efficientdet_lite1/s03e03 \
     --show-vid \
     --save-vid \
     --crop

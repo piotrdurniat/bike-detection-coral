@@ -1,7 +1,8 @@
 from detection_counter.Point import Point
-class DetectionUnit:
 
-    def __init__(self, params, conf):
+
+class DetectionUnit:
+    def __init__(self, params):
 
         self.left = params[0]
         self.top = params[1]
@@ -9,7 +10,7 @@ class DetectionUnit:
         self.bottom = params[3]
         self.id = params[4]
         self.cls = params[5]
-        self.conf = conf
+        self.conf = params[6]
 
         self.centerX = self.left + (self.right - self.left) / 2
         self.centerY = self.top + (self.bottom - self.top) / 2
