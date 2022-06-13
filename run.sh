@@ -1,9 +1,10 @@
 python3 bikedet.py \
-    --input ~/Projects/PZ_neuro/sources/s03e03.mp4 \
-    --output-dir ./runs/efficientdet_lite1/s03e03 \
+    --input ~/Projects/PZ_neuro/sources/s04e01-crop.mp4 \
+    --output-dir ./runs/efficientdet_lite1/s04e01-tmp \
     --show-vid \
     --save-vid \
-    --crop
+    --config configs/5.json
+# --crop
 
 # --model models/efficientdet_lite1_384_ptq_edgetpu.tflite \
 # --model models/efficientdet_lite1_384_ptq_edgetpu.tflite \

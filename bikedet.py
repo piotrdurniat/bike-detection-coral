@@ -11,7 +11,6 @@ import json
 
 from PIL import Image
 from PIL import ImageDraw
-from detection_counter.annotator import draw_line, draw_objects, write_text
 from third_party.sort_master.sort import *
 from pathlib import PosixPath, Path
 
@@ -20,7 +19,7 @@ import tflite_runtime.interpreter as tflite
 import platform
 
 from detection_counter.DetectionLine import DetectionLine
-# from detection_counter.annotator import draw_line, draw_point, write_text
+from detection_counter.annotator import draw_line, draw_objects, write_text
 from detection_counter.DetectionUnit import DetectionUnit
 from detection_counter.DetectionHistoryContainer import DetectionHistoryContainer
 from detection_counter.Point import Point
@@ -176,7 +175,6 @@ def combine_dets(objs, trdata):
 
 def run_detector(model, labels, threshold, output_dir, input_file, show_vid, save_vid, detection_line, detection_box, output_vid_path):
     labels = load_labels(labels) if labels else {}
-    print(labels)
     interpreter = make_interpreter(model)
     interpreter.allocate_tensors()
 
