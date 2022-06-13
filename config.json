@@ -1,0 +1,13 @@
+{
+  "detectionBox": {
+    "centerX": 1100,
+    "centerY": 750,
+    "width": 512
+  },
+  "detectionLine": {
+    "x1": 120,
+    "y1": 100,
+    "x2": 460,
+    "y2": 270
+  }
+}
