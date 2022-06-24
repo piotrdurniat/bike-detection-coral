@@ -31,7 +31,7 @@ $$
 The actual value of the tested parameter $p$ is higher than the value $\hat p_L$ with $95\%$ probability.
 
 $$
-\hat p_L  = \max\left \{ 0, \frac{2N\hat p + z^2 - \left [z\sqrt{z^2 -(1/N)+4N\hat p (1-\hat p) + (4\hat p - 2)} + 1 \right ]}{2\cdot(N+z^2)}\right \}
+\hat p_L  = \max\left\lbrace 0, \frac{2N\hat p + z^2 - \left[z\sqrt{z^2 -(1/N)+4N\hat p (1-\hat p) + (4\hat p - 2)} + 1 \right ]}{2\cdot(N+z^2)}\right\rbrace
 $$
 
 - $\hat p_L$ - lower value of the symmetric confidence interval, calculated using the Wilson method,
